@@ -1,9 +1,9 @@
-from matplotlib import pyplot as plt
-import matplotlib.patches, matplotlib.lines
-import numpy as np
 import math
-import operator
-import time
+
+import matplotlib.lines
+import matplotlib.patches
+import numpy as np
+from matplotlib import pyplot as plt
 
 
 def show_path(B: float, r: float, V: float, q: float, m: float, timestep: float = 10 ** -9) -> None:
@@ -80,7 +80,6 @@ def show_path(B: float, r: float, V: float, q: float, m: float, timestep: float 
 
 
 def show_path_diff(B: float, r: float, V: float, q: float, m: float, timestep: float = 10 ** -9) -> None:
-
     mass = m * 1.66054e-27
     charge = q * 1.60217662e-19
 
@@ -92,10 +91,10 @@ def show_path_diff(B: float, r: float, V: float, q: float, m: float, timestep: f
     speed = math.sqrt(2 * energy / mass)
 
     k = charge * B / mass
-    t = math.pi/(2*k)
+    t = math.pi / (2 * k)
 
     values = list(np.arange(0, t, timestep))
-    points = [[speed*(1-math.cos(k*i))/k for i in values], [speed*math.sin(k*i)/k-r for i in values]]
+    points = [[speed * (1 - math.cos(k * i)) / k for i in values], [speed * math.sin(k * i) / k - r for i in values]]
 
     fig, ax = plt.subplots()
 
@@ -107,7 +106,6 @@ def show_path_diff(B: float, r: float, V: float, q: float, m: float, timestep: f
 
 
 def is_detected(B: float, r: float, V: float, q: float, m: float, back_length: float, slit_width: float) -> bool:
-
     mass = m * 1.66054e-27
     charge = q * 1.60217662e-19
 
@@ -125,36 +123,38 @@ def is_detected(B: float, r: float, V: float, q: float, m: float, back_length: f
     entry_x = 0
     entry_y = -r
 
-    tangent_gradient = np.inf if v_x == 0 else v_y/v_x
+    tangent_gradient = np.inf if v_x == 0 else v_y / v_x
 
     radius_length = mass * speed / (charge * B)
-    radius_gradient = -1/tangent_gradient
+    radius_gradient = -1 / tangent_gradient
 
-    centre_x = radius_length*math.sqrt(1/(1+radius_gradient**2)) + entry_x
+    centre_x = radius_length * math.sqrt(1 / (1 + radius_gradient ** 2)) + entry_x
     centre_y = radius_gradient * centre_x + entry_y
 
     a = centre_x
     b = centre_y
     p = radius_length
     k = r ** 2 + a ** 2 + b ** 2 - p ** 2
-    exit_y = (b*k + math.sqrt(4 * a**4 * r**2 + 4 * a**2 * b**2 * r**2 - a**2 * k**2)) / (2*(a**2 + b**2))
-    exit_x = math.sqrt(r**2 - exit_y**2)
+    exit_y = (b * k + math.sqrt(4 * a ** 4 * r ** 2 + 4 * a ** 2 * b ** 2 * r ** 2 - a ** 2 * k ** 2)) / (
+                2 * (a ** 2 + b ** 2))
+    exit_x = math.sqrt(r ** 2 - exit_y ** 2)
 
-    radius_gradient_2 = np.inf if exit_x == centre_x else (exit_y-centre_y) / (exit_x-centre_x)
-    tangent_gradient_2 = -1/radius_gradient_2
+    radius_gradient_2 = np.inf if exit_x == centre_x else (exit_y - centre_y) / (exit_x - centre_x)
+    tangent_gradient_2 = -1 / radius_gradient_2
 
-    #exit_v_x = speed * math.sqrt(1/(1+tangent_gradient_2**2))
-    #exit_v_y = tangent_gradient_2 * exit_v_x
+    # exit_v_x = speed * math.sqrt(1/(1+tangent_gradient_2**2))
+    # exit_v_y = tangent_gradient_2 * exit_v_x
 
     c = exit_y - tangent_gradient_2 * exit_x
-    y = tangent_gradient_2 * (back_length+r) + c
+    y = tangent_gradient_2 * (back_length + r) + c
 
     print(y)
 
-    return abs(y) <= slit_width/2
+    return abs(y) <= slit_width / 2
 
 
-def is_detected_angle(B: float, r: float, V: float, q: float, m: float, entry_length: float, exit_length: float, angle: float, slit_width: float):
+def is_detected_angle(B: float, r: float, V: float, q: float, m: float, entry_length: float, exit_length: float,
+                      angle: float, slit_width: float):
     """
     Checks is a given fired particle would be detected by the machine
 
@@ -211,8 +211,8 @@ def is_detected_angle(B: float, r: float, V: float, q: float, m: float, entry_le
         exit_y = (b * k - determinant) / (2 * (a ** 2 + b ** 2))
 
     exit_x = math.sqrt(r ** 2 - exit_y ** 2)
-    if abs(((exit_x - centre_x) ** 2 + (exit_y - centre_y) ** 2) - radius_length ** 2) >= 1e-12 or abs(
-            exit_x - entry_x) < 1e-12:
+    if abs(((exit_x - centre_x) ** 2 + (exit_y - centre_y) ** 2) - radius_length ** 2) >= 1e-12 or \
+            abs(exit_x - entry_x) < 1e-12:
         # It is the other x solution!
         exit_x = -exit_x
 
@@ -237,7 +237,8 @@ def is_detected_angle(B: float, r: float, V: float, q: float, m: float, entry_le
     return abs(final_y) <= slit_width / 2
 
 
-def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry_length: float, exit_length: float, angle: float, slit_width: float):
+def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry_length: float, exit_length: float,
+                         angle: float, slit_width: float):
     """
 
     :param B:
@@ -308,7 +309,8 @@ def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry
 
     exit_above_line = exit_y > (radius_gradient * exit_x + (entry_y - radius_gradient * entry_x))
     op = (lambda x, y: x - y) if exit_above_line else (lambda x, y: x + y)
-    end_angle = op((180 - angle), 180 * math.acos(1 - ((entry_x - exit_x) ** 2 + (entry_y - exit_y) ** 2) / (2 * radius_length**2)) / math.pi)
+    end_angle = op((180 - angle), 180 * math.acos(
+        1 - ((entry_x - exit_x) ** 2 + (entry_y - exit_y) ** 2) / (2 * radius_length ** 2)) / math.pi)
     arc_path = matplotlib.patches.Arc((centre_x, centre_y), radius_length * 2, radius_length * 2, 0,
                                       end_angle, 180 - angle, color="green")
 
@@ -317,7 +319,7 @@ def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry
         y1 = tangent_gradient * x1 - r - entry_length
     else:
         x1 = np.zeros(1000)
-        y1 = np.linspace(-r-entry_length, -r, 1000)
+        y1 = np.linspace(-r - entry_length, -r, 1000)
 
     # x^2 + y^2 = distance^2 (y = mx + c simplified)
     distance_right = (exit_x + 1) ** 2 + (tangent_gradient_2 + exit_y) ** 2
@@ -325,21 +327,20 @@ def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry
 
     going_right = distance_right >= distance_left
 
-    end_x = r+exit_length if going_right else -r-exit_length
+    end_x = r + exit_length if going_right else -r - exit_length
     x2 = np.linspace(exit_x, end_x, 1000)
     y2 = tangent_gradient_2 * x2 + (exit_y - tangent_gradient_2 * exit_x)
 
     ax.plot(x1, y1)
     ax.plot(x2, y2)
 
-    ax.vlines(r + exit_length, -abs(y2[-1])*2, -slit_width / 2, color="purple")
-    ax.vlines(r + exit_length, slit_width / 2, abs(y2[-1])*2, color="purple")
+    ax.vlines(r + exit_length, -abs(y2[-1]) * 2, -slit_width / 2, color="purple")
+    ax.vlines(r + exit_length, slit_width / 2, abs(y2[-1]) * 2, color="purple")
 
     ax.add_patch(arc_path)
     lim = max(1.2 * r + entry_length, 1.2 * r + exit_length)
     ax.set(xlim=(-lim, lim), ylim=(-lim, lim))
     fig.show()
-
 
 
 show_path_diff_angle(0.6752985451, 0.05, 550, 1, 100, 0.05, 0.05, 3, 6.7e-5)
