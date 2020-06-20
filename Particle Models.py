@@ -343,5 +343,5 @@ def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry
     fig.show()
 
 
-show_path_diff_angle(0.6752985451, 0.05, 550, 1, 100, 0.05, 0.05, 3, 6.7e-5)
+show_path_diff_angle(0.4, 0.05, 350, 1, 20, 0.05, 0.05, 7.24, 6.7e-5)
 print(is_detected_angle(0.6752985451, 0.05, 550, 1, 100, 0.05, 0.05, 3, 6.7e-5))
