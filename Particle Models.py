@@ -364,7 +364,7 @@ def backwards_tof(L: float, V: float, t: float) -> float:
     # Returns mass-to-charge ratio
     speed = L / t
 
-    return 2 * V / speed ** 2
+    return 2 * V / speed ** 2 * (1.60217662e-19 / 1.66054e-27)
 
 
 ''' Fig 1 and 2
