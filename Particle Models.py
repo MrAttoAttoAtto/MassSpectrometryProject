@@ -3,10 +3,7 @@ import math
 import matplotlib.lines
 import matplotlib.patches
 import numpy as np
-import scipy.stats as ss
 from matplotlib import pyplot as plt
-
-import random
 
 
 def show_path(B: float, r: float, V: float, q: float, m: float, timestep: float = 10 ** -9) -> None:
@@ -139,7 +136,7 @@ def is_detected(B: float, r: float, V: float, q: float, m: float, back_length: f
     p = radius_length
     k = r ** 2 + a ** 2 + b ** 2 - p ** 2
     exit_y = (b * k + math.sqrt(4 * a ** 4 * r ** 2 + 4 * a ** 2 * b ** 2 * r ** 2 - a ** 2 * k ** 2)) / (
-                2 * (a ** 2 + b ** 2))
+            2 * (a ** 2 + b ** 2))
     exit_x = math.sqrt(r ** 2 - exit_y ** 2)
 
     radius_gradient_2 = np.inf if exit_x == centre_x else (exit_y - centre_y) / (exit_x - centre_x)
@@ -337,13 +334,31 @@ def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry
     ax.plot(x1, y1)
     ax.plot(x2, y2)
 
-    ax.vlines(r + exit_length, -slit_width / 2, -r,  color="purple")
+    ax.vlines(r + exit_length, -slit_width / 2, -r, color="purple")
     ax.vlines(r + exit_length, slit_width / 2, r, color="purple")
 
     ax.add_patch(arc_path)
     lim = max(1.2 * r + entry_length, 1.2 * r + exit_length)
     ax.set(xlim=(-lim, lim), ylim=(-lim, lim))
     fig.show()
+
+
+def time_of_flight(L: float, V: float, m: float, q: float, expected_t: float, t_lenience: float) -> bool:
+    mass = m * 1.66054e-27
+    charge = q * 1.60217662e-19
+
+    # Note that this is constant, as the magnetic field can do no work on the particle as it always contributes
+    # a force perpendicular to the direction of motion
+    energy = V * charge
+
+    # energy = 1/2*mass*v^2 ==> v = root(2energy/mass)
+    speed = math.sqrt(2 * energy / mass)
+
+    # time = distance/speed
+    t = L / speed
+
+    return abs(t - expected_t) <= t_lenience
+
 
 ''' Fig 1 and 2
 R = 0.05
@@ -376,19 +391,21 @@ ax.set_title("Maximum difference in m/q still detected when tuned for m/q")
 plt.show()
 '''
 
-w = 0.01
+'''
+w = 0.04
 q = 1
 deltaDodgyFrac = 0.001
-V = 550
-m = 1
-resX = np.linspace(0.001, 0.1, 10000)
+entryExit = 0.000
+V = 250
+m = 2
+resX = np.linspace(0.001, 0.1, 1000)
 resY = []
 for R in resX:
     dodgyFrac = 0
     B = math.sqrt(2*V/((q*1.60217662e-19)/(m*1.66054e-27)))/R
     while True:
         newM = m + dodgyFrac*m
-        if not is_detected_angle(B, R, V, q, newM, R, R, 0, w):
+        if not is_detected_angle(B, R, V, q, newM, entryExit, entryExit, 0, w):
             break
         dodgyFrac += deltaDodgyFrac
 
@@ -397,10 +414,51 @@ for R in resX:
 
 fig, ax = plt.subplots()
 #ax.set(xlim=(0, resX[-1]*1.05), ylim=(0, resY[-1]*1.05))
-ax.scatter(resX, [resX[i]**1 * resY[i] for i in range(len(resY))], s=2)
+ax.scatter(resX, [resX[i]**2 * resY[i] for i in range(len(resY))], s=2)
 ax.set_xlabel("R (metres)")
 ax.set_ylabel("(Maximum Δ(m/q)/(m/q) still observed) x R (metres)")
 ax.set_title("(Maximum Δ(m/q)/(m/q) still detected) x R when tuned for m/q, varying R")
+#ax.set_ylabel("Maximum Δ(m/q)/(m/q) still observed (dimensionless)")
+#ax.set_title("Maximum Δ(m/q)/(m/q) still detected when tuned for m/q, varying R")
 plt.show()
 
-print(ss.linregress(resX, [resX[i]**1 * resY[i] for i in range(len(resY))]))
+print(ss.linregress(resX, [resX[i]**2 * resY[i] for i in range(len(resY))]))
+'''
+
+'''R, V, q, m, U, w, alDelta = 0.1, 550, 1, 15, 0.1, 0.01, 0.01
+B = math.sqrt((2*V)/((1.60217662e-19*q)/(m*1.66054e-27)))/R
+
+fracs = np.linspace(0, 2, 500)
+ys1 = []
+for frac in fracs:
+    al = 0
+    tot = 0
+    X = frac * R**2 / U
+    try:
+        while al <= 90:
+            tot += is_detected_angle(B, R, V, q, m, U, X, al, w)
+            al += alDelta
+    except ValueError:
+        pass
+    ys1.append(tot)
+
+ys2 = []
+for frac in fracs:
+    al = 0
+    tot = 0
+    X = frac * R**2 / U
+    try:
+        while al >= -90:
+            tot += is_detected_angle(B, R, V, q, m, U, X, al, w)
+            al -= alDelta
+    except ValueError:
+        pass
+    ys2.append(tot)
+
+fig, ax = plt.subplots()
+ax.scatter(fracs, [x + y for x, y in zip(ys1, ys2)], s=2)
+plt.show()
+'''
+
+print(is_detected_angle(0.26154200189617205, 0.05, 550, 1, 15, 0.05, 0.05, 4, 0.01))
+show_path_diff_angle(0.26154200189617205, 0.05, 550, 1, 15, 0.05, 0.05, 4, 0.01)
