@@ -5,6 +5,8 @@ import matplotlib.patches
 import numpy as np
 from matplotlib import pyplot as plt
 
+import random
+
 
 def show_path(B: float, r: float, V: float, q: float, m: float, timestep: float = 10 ** -9) -> None:
     """
@@ -334,8 +336,8 @@ def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry
     ax.plot(x1, y1)
     ax.plot(x2, y2)
 
-    ax.vlines(r + exit_length, -abs(y2[-1]) * 2, -slit_width / 2, color="purple")
-    ax.vlines(r + exit_length, slit_width / 2, abs(y2[-1]) * 2, color="purple")
+    ax.vlines(r + exit_length, -slit_width / 2, -r,  color="purple")
+    ax.vlines(r + exit_length, slit_width / 2, r, color="purple")
 
     ax.add_patch(arc_path)
     lim = max(1.2 * r + entry_length, 1.2 * r + exit_length)
@@ -343,5 +345,7 @@ def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry
     fig.show()
 
 
-show_path_diff_angle(0.4, 0.05, 350, 1, 20, 0.05, 0.05, 7.24, 6.7e-5)
-print(is_detected_angle(0.6752985451, 0.05, 550, 1, 100, 0.05, 0.05, 3, 6.7e-5))
+show_path_diff_angle(0.3020026904, 0.05, 550, 1, 20, 0.05, 0.05, 0, 0.01)
+#cool = [[random.random()+1, random.random()*0.05+0.01] for i in range(10000)]
+#for i in range(10000):
+#    is_detected_angle(0.6752985451, cool[i][1], 550, 1, 100, 0.05, 0.05, cool[i][0], 6.7e-5)
