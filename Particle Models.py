@@ -3,6 +3,7 @@ import math
 import matplotlib.lines
 import matplotlib.patches
 import numpy as np
+import scipy.stats as ss
 from matplotlib import pyplot as plt
 
 import random
@@ -344,8 +345,62 @@ def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry
     ax.set(xlim=(-lim, lim), ylim=(-lim, lim))
     fig.show()
 
+''' Fig 1 and 2
+R = 0.05
+w = 0.01
+V = 550
+deltaDeltaM = 0.001
+fig, ax = plt.subplots()
 
-show_path_diff_angle(0.3020026904, 0.05, 550, 1, 20, 0.05, 0.05, 0, 0.01)
-#cool = [[random.random()+1, random.random()*0.05+0.01] for i in range(10000)]
-#for i in range(10000):
-#    is_detected_angle(0.6752985451, cool[i][1], 550, 1, 100, 0.05, 0.05, cool[i][0], 6.7e-5)
+qs = [0.01] + list(range(1, 11))
+#qs = [1]
+resXes = []
+resYes = []
+for i, q in enumerate(qs):
+    print(q)
+    resXes.append([0.01] + list(range(1, 101)))
+    resYes.append([])
+    for m in resXes[i]:
+        deltaM = 0
+        B = math.sqrt(2*V/((q*1.60217662e-19)/(m*1.66054e-27)))/R
+        while is_detected_angle(B, R, V, q, m+deltaM, R, R, 0, w):
+            deltaM += deltaDeltaM
+        resYes[i].append(deltaM-deltaDeltaM)
+
+    ax.scatter([x/q for x in resXes[i]], [y/q for y in resYes[i]], s=2)
+
+ax.set(xlim=(0, resXes[0][-1]*1.05), ylim=(0, resYes[0][-1]*1.05))
+ax.set_xlabel("Mass/charge of tuned particle (m/q, Daltons/electron charge)")
+ax.set_ylabel("Maximum Δ(m/q) still observed (Daltons/electron charge)")
+ax.set_title("Maximum difference in m/q still detected when tuned for m/q")
+plt.show()
+'''
+
+w = 0.01
+q = 1
+deltaDodgyFrac = 0.001
+V = 550
+m = 1
+resX = np.linspace(0.001, 0.1, 10000)
+resY = []
+for R in resX:
+    dodgyFrac = 0
+    B = math.sqrt(2*V/((q*1.60217662e-19)/(m*1.66054e-27)))/R
+    while True:
+        newM = m + dodgyFrac*m
+        if not is_detected_angle(B, R, V, q, newM, R, R, 0, w):
+            break
+        dodgyFrac += deltaDodgyFrac
+
+    print(dodgyFrac)
+    resY.append(dodgyFrac-deltaDodgyFrac)
+
+fig, ax = plt.subplots()
+#ax.set(xlim=(0, resX[-1]*1.05), ylim=(0, resY[-1]*1.05))
+ax.scatter(resX, [resX[i]**1 * resY[i] for i in range(len(resY))], s=2)
+ax.set_xlabel("R (metres)")
+ax.set_ylabel("(Maximum Δ(m/q)/(m/q) still observed) x R (metres)")
+ax.set_title("(Maximum Δ(m/q)/(m/q) still detected) x R when tuned for m/q, varying R")
+plt.show()
+
+print(ss.linregress(resX, [resX[i]**1 * resY[i] for i in range(len(resY))]))
