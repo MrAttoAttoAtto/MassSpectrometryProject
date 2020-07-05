@@ -343,7 +343,7 @@ def show_path_diff_angle(B: float, r: float, V: float, q: float, m: float, entry
     fig.show()
 
 
-def time_of_flight(L: float, V: float, m: float, q: float, expected_t: float, t_lenience: float) -> bool:
+def time_of_flight(L: float, V: float, m: float, q: float) -> float:
     mass = m * 1.66054e-27
     charge = q * 1.60217662e-19
 
@@ -357,7 +357,7 @@ def time_of_flight(L: float, V: float, m: float, q: float, expected_t: float, t_
     # time = distance/speed
     t = L / speed
 
-    return abs(t - expected_t) <= t_lenience
+    return t
 
 
 ''' Fig 1 and 2
