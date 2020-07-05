@@ -360,6 +360,13 @@ def time_of_flight(L: float, V: float, m: float, q: float) -> float:
     return t
 
 
+def backwards_tof(L: float, V: float, t: float) -> float:
+    # Returns mass-to-charge ratio
+    speed = L / t
+
+    return 2 * V / speed ** 2
+
+
 ''' Fig 1 and 2
 R = 0.05
 w = 0.01
