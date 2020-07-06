@@ -20,9 +20,10 @@ class Atom:
 
 
 class Bond:
-    def __init__(self, start: Atom, end: Atom):
+    def __init__(self, start: Atom, end: Atom, strength: float):
         self.start = start
         self.end = end
+        self.strength = strength/50
 
 
 def estimate_relative_frequencies(bonds: List[Bond], molecule_name=None, factor: float = 1):
@@ -139,7 +140,7 @@ def estimate_relative_frequencies(bonds: List[Bond], molecule_name=None, factor:
             if 1 not in old_bond.start.element.masses:
                 left_mzs = dict(zip(old_bond.start.element.masses, np.array(old_bond.start.element.abundances)*factor*0.1))
         else:
-            left_mzs = estimate_relative_frequencies(left_molecule, None, factor * 0.25)
+            left_mzs = estimate_relative_frequencies(left_molecule, None, factor / old_bond.strength)
 
         mzs = {key: mzs.get(key, 0) + left_mzs.get(key, 0)
                for key in set(mzs) | set(left_mzs)}
@@ -149,7 +150,7 @@ def estimate_relative_frequencies(bonds: List[Bond], molecule_name=None, factor:
             if 1 not in old_bond.end.element.masses:
                 right_mzs = dict(zip(old_bond.end.element.masses, np.array(old_bond.end.element.abundances)*factor*0.1))
         else:
-            right_mzs = estimate_relative_frequencies(right_molecule, None, factor * 0.25)
+            right_mzs = estimate_relative_frequencies(right_molecule, None, factor / old_bond.strength)
 
         mzs = {key: mzs.get(key, 0) + right_mzs.get(key, 0)
                   for key in set(mzs) | set(right_mzs)}
@@ -187,8 +188,8 @@ def estimate_relative_frequencies(bonds: List[Bond], molecule_name=None, factor:
 
     ax.set_title(f"Mass Spectrum{' for ' + molecule_name if molecule_name is not None else ''}")
 
-    #fig.show()
-    fig.savefig("C:\\Users\\Attoa\\Downloads\\cool.png")
+    plt.show()
+    #fig.savefig("C:\\Users\\<username>\\Downloads\\cool.png")
 
 
 carbon = Element([12, 13], [0.989, 0.011])
@@ -215,17 +216,30 @@ bonds = [
     Bond(right_carbon, Atom(hydrogen))
 ]'''
 
+'''
 left_carbon = Atom(carbon)
 right_carbon = Atom(carbon)
 
 bonds = [
-    Bond(left_carbon, Atom(hydrogen)),
-    Bond(left_carbon, Atom(hydrogen)),
-    Bond(left_carbon, Atom(hydrogen)),
-    Bond(left_carbon, right_carbon),
-    Bond(right_carbon, Atom(hydrogen)),
-    Bond(right_carbon, Atom(hydrogen)),
-    Bond(right_carbon, Atom(hydrogen))
+    Bond(left_carbon, Atom(hydrogen), 413),
+    Bond(left_carbon, Atom(hydrogen), 413),
+    Bond(left_carbon, Atom(hydrogen), 413),
+    Bond(left_carbon, right_carbon, 346),
+    Bond(right_carbon, Atom(hydrogen), 413),
+    Bond(right_carbon, Atom(hydrogen), 413),
+    Bond(right_carbon, Atom(hydrogen), 413)
 ]
 
 estimate_relative_frequencies(bonds, "Ethane")
+'''
+
+right_carbon = Atom(carbon)
+
+bonds = [
+    Bond(right_carbon, Atom(chlorine), 346),
+    Bond(right_carbon, Atom(chlorine), 346),
+    Bond(right_carbon, Atom(chlorine), 346),
+    Bond(right_carbon, Atom(hydrogen), 413)
+]
+
+estimate_relative_frequencies(bonds, "Chloroform")
