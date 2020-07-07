@@ -234,6 +234,7 @@ def is_detected_angle(B: float, r: float, V: float, q: float, m: float, entry_le
     c = exit_y - tangent_gradient_2 * exit_x
     final_y = tangent_gradient_2 * (exit_length + r) + c
 
+    return final_y
     return abs(final_y) <= slit_width / 2
 
 
@@ -466,6 +467,29 @@ fig, ax = plt.subplots()
 ax.scatter(fracs, [x + y for x, y in zip(ys1, ys2)], s=2)
 plt.show()
 '''
+'''
+print(time_of_flight(1, 550, 15, 2))
+print(backwards_tof(1, 550, 8.406278322994914e-06))
+'''
 
-print(is_detected_angle(0.26154200189617205, 0.05, 550, 1, 15, 0.05, 0.05, 4, 0.01))
-show_path_diff_angle(0.26154200189617205, 0.05, 550, 1, 15, 0.05, 0.05, 4, 0.01)
+combos = [(0.025, 0.05), (0.025, 0.1), (0.05, 0.05), (0.025, 0.03), (0.025, 0.025)]
+xes = np.linspace(0, 45, 1000)
+
+fig, ax = plt.subplots()
+
+for combo in combos:
+    yes = []
+    for x in xes:
+        try:
+            y = is_detected_angle(0.26156200189617205, 0.05, 550, 1, 15, combo[0], combo[1], x, 0.01)
+            yes.append(y)
+        except ValueError:
+            break
+
+    ax.scatter(xes[:len(yes)], yes, s=2, label=f"U={combo[0]}, X={combo[1]}")
+
+ax.legend()
+ax.set_xlabel("α (angle of entry, degrees)")
+ax.set_ylabel("y-ordinate at point of detector (metres)")
+ax.set_title("Angle of entry vs final (y) position")
+plt.show()

@@ -106,54 +106,58 @@ def estimate_relative_frequencies(bonds: List[Bond], molecule_name=None, factor:
 
         del left_molecule[0]
 
-        j = 0
-        right_molecule = [old_bond]
-        checked_atoms = []
-        while True:
-            if j == len(right_molecule):
-                break
-            bond_to_check = right_molecule[j]
-
-            atom_to_check = bond_to_check.end
-            if atom_to_check not in checked_atoms:
-                for bond in connections[atom_to_check]:
-                    if bond not in right_molecule:
-                        right_molecule.append(bond)
-
-                checked_atoms.append(bond_to_check.end)
-
-            if j != 0:
-                atom_to_check = bond_to_check.start
-                if atom_to_check not in checked_atoms:
-                    for bond in connections[atom_to_check]:
-                        if bond not in right_molecule:
-                            right_molecule.append(bond)
-
-                    checked_atoms.append(bond_to_check.start)
-
-            j += 1
-
-        del right_molecule[0]
-
         left_mzs = {}
         if len(left_molecule) == 0:
             if 1 not in old_bond.start.element.masses:
-                left_mzs = dict(zip(old_bond.start.element.masses, np.array(old_bond.start.element.abundances)*factor*0.1))
+                left_mzs = dict(zip(old_bond.start.element.masses,
+                                    np.array(old_bond.start.element.abundances) * factor * 0.1 / old_bond.strength))
         else:
             left_mzs = estimate_relative_frequencies(left_molecule, None, factor / old_bond.strength)
 
         mzs = {key: mzs.get(key, 0) + left_mzs.get(key, 0)
                for key in set(mzs) | set(left_mzs)}
 
-        right_mzs = {}
-        if len(right_molecule) == 0:
-            if 1 not in old_bond.end.element.masses:
-                right_mzs = dict(zip(old_bond.end.element.masses, np.array(old_bond.end.element.abundances)*factor*0.1))
-        else:
-            right_mzs = estimate_relative_frequencies(right_molecule, None, factor / old_bond.strength)
+        # Checks if the molecule's atoms have actually changed (i.e. is not cyclic)
+        if len(checked_atoms) != len(atoms):
+            j = 0
+            right_molecule = [old_bond]
+            checked_atoms = []
+            while True:
+                if j == len(right_molecule):
+                    break
+                bond_to_check = right_molecule[j]
 
-        mzs = {key: mzs.get(key, 0) + right_mzs.get(key, 0)
-                  for key in set(mzs) | set(right_mzs)}
+                atom_to_check = bond_to_check.end
+                if atom_to_check not in checked_atoms:
+                    for bond in connections[atom_to_check]:
+                        if bond not in right_molecule:
+                            right_molecule.append(bond)
+
+                    checked_atoms.append(bond_to_check.end)
+
+                if j != 0:
+                    atom_to_check = bond_to_check.start
+                    if atom_to_check not in checked_atoms:
+                        for bond in connections[atom_to_check]:
+                            if bond not in right_molecule:
+                                right_molecule.append(bond)
+
+                        checked_atoms.append(bond_to_check.start)
+
+                j += 1
+
+            del right_molecule[0]
+
+            right_mzs = {}
+            if len(right_molecule) == 0:
+                if 1 not in old_bond.end.element.masses:
+                    right_mzs = dict(zip(old_bond.end.element.masses,
+                                         np.array(old_bond.end.element.abundances) * factor * 0.1 / old_bond.strength))
+            else:
+                right_mzs = estimate_relative_frequencies(right_molecule, None, factor / old_bond.strength)
+
+            mzs = {key: mzs.get(key, 0) + right_mzs.get(key, 0)
+                   for key in set(mzs) | set(right_mzs)}
 
     if factor != 1:
         return mzs
@@ -216,7 +220,7 @@ bonds = [
     Bond(right_carbon, Atom(hydrogen))
 ]'''
 
-'''
+
 left_carbon = Atom(carbon)
 right_carbon = Atom(carbon)
 
@@ -231,8 +235,8 @@ bonds = [
 ]
 
 estimate_relative_frequencies(bonds, "Ethane")
-'''
 
+'''
 right_carbon = Atom(carbon)
 
 bonds = [
@@ -243,3 +247,4 @@ bonds = [
 ]
 
 estimate_relative_frequencies(bonds, "Chloroform")
+'''
